@@ -37,12 +37,27 @@ const RoomSchema = new mongoose.Schema({
 
 RoomSchema.methods.beatPawns = function (position, attackingPawnColor) {
     const pawnsOnPosition = this.pawns.filter(pawn => pawn.position === position);
+    let capturedCount = 0;
+
     pawnsOnPosition.forEach(pawn => {
         if (pawn.color !== attackingPawnColor) {
             const index = this.getPawnIndex(pawn._id);
             this.pawns[index].position = this.pawns[index].basePos;
+            capturedCount++;
         }
     });
+
+    // Award capture points to the attacking player
+    if (capturedCount > 0) {
+        const attackingPlayer = this.players.find(player => player.color === attackingPawnColor);
+        if (attackingPlayer) {
+            for (let i = 0; i < capturedCount; i++) {
+                attackingPlayer.addCaptureScore();
+            }
+        }
+    }
+
+    return capturedCount;
 };
 
 RoomSchema.methods.changeMovingPlayer = function () {
@@ -61,8 +76,30 @@ RoomSchema.methods.changeMovingPlayer = function () {
 };
 
 RoomSchema.methods.movePawn = function (pawn) {
+    const oldPosition = pawn.position;
     const newPositionOfMovedPawn = pawn.getPositionAfterMove(this.rolledNumber);
+    const player = this.players.find(p => p.color === pawn.color);
+
+    // Calculate movement distance for scoring
+    let movementDistance = this.rolledNumber;
+    if (oldPosition === pawn.basePos) {
+        // Moving from base position, award points for the rolled number
+        movementDistance = this.rolledNumber;
+    }
+
     this.changePositionOfPawn(pawn, newPositionOfMovedPawn);
+
+    // Award progress points
+    if (player) {
+        player.addProgressScore(movementDistance);
+
+        // Check if pawn reached home (final positions: red=73, blue=79, green=85, yellow=91)
+        const homePositions = { red: 73, blue: 79, green: 85, yellow: 91 };
+        if (newPositionOfMovedPawn === homePositions[pawn.color]) {
+            player.addHomeScore();
+        }
+    }
+
     this.beatPawns(newPositionOfMovedPawn, pawn.color);
 };
 
@@ -94,6 +131,13 @@ RoomSchema.methods.endGame = function (winner) {
     this.rolledNumber = null;
     this.nextMoveTime = null;
     this.players.map(player => (player.nowMoving = false));
+
+    // Award win bonus to the winner
+    const winningPlayer = this.players.find(player => player.color === winner);
+    if (winningPlayer) {
+        winningPlayer.addWinBonus();
+    }
+
     this.winner = winner;
     this.save();
 };
@@ -149,6 +193,20 @@ RoomSchema.methods.getPlayerPawns = function (color) {
 
 RoomSchema.methods.getCurrentlyMovingPlayer = function () {
     return this.players.find(player => player.nowMoving === true);
+};
+
+RoomSchema.methods.getLeaderboard = function () {
+    return this.players
+        .filter(player => player.name !== '...')
+        .sort((a, b) => b.score - a.score)
+        .map((player, index) => ({
+            rank: index + 1,
+            name: player.name,
+            color: player.color,
+            score: player.score,
+            pawnsInHome: player.pawnsInHome,
+            pawnsCaptured: player.pawnsCaptured,
+        }));
 };
 
 const Room = mongoose.model('Room', RoomSchema);

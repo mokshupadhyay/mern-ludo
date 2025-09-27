@@ -10,11 +10,19 @@ module.exports = socket => {
         if (room.winner) return;
         const pawn = room.getPawn(pawnId);
         if (isMoveValid(req.session, pawn, room)) {
-            const newPositionOfMovedPawn = pawn.getPositionAfterMove(room.rolledNumber);
-            room.changePositionOfPawn(pawn, newPositionOfMovedPawn);
-            room.beatPawns(newPositionOfMovedPawn, req.session.color);
+            // Use room.movePawn which handles scoring automatically
+            room.movePawn(pawn);
 
-            // Send score updates after move
+            room.changeMovingPlayer();
+            const winner = room.getWinner();
+            if (winner) {
+                room.endGame(winner);
+            }
+
+            // Save room first, then send updates
+            await updateRoom(room);
+
+            // Send score updates after room is saved
             const scores = room.players.map(player => ({
                 color: player.color,
                 name: player.name,
@@ -25,35 +33,26 @@ module.exports = socket => {
             sendScoreUpdate(room._id.toString(), scores);
             sendLeaderboard(room._id.toString(), room.getLeaderboard());
 
-            room.changeMovingPlayer();
-            const winner = room.getWinner();
             if (winner) {
-                room.endGame(winner);
                 sendWinner(room._id.toString(), winner);
-                // Send final scores after game ends
-                const finalScores = room.players.map(player => ({
-                    color: player.color,
-                    name: player.name,
-                    score: player.score,
-                    pawnsInHome: player.pawnsInHome,
-                    pawnsCaptured: player.pawnsCaptured,
-                }));
-                sendScoreUpdate(room._id.toString(), finalScores);
-                sendLeaderboard(room._id.toString(), room.getLeaderboard());
             }
-            await updateRoom(room);
         }
     };
 
     const handleRollDice = async () => {
         const rolledNumber = rollDice();
         sendToPlayersRolledNumber(req.session.roomId, rolledNumber);
-        const room = await updateRoom({ _id: req.session.roomId, rolledNumber: rolledNumber });
+
+        // Get the room and update the rolled number
+        const room = await getRoom(req.session.roomId);
+        room.rolledNumber = rolledNumber;
+
         const player = room.getPlayer(req.session.playerId);
         if (!player.canMove(room, rolledNumber)) {
             room.changeMovingPlayer();
-            await updateRoom(room);
         }
+
+        await updateRoom(room);
     };
 
     socket.on('game:roll', handleRollDice);

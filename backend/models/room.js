@@ -80,27 +80,26 @@ RoomSchema.methods.movePawn = function (pawn) {
     const newPositionOfMovedPawn = pawn.getPositionAfterMove(this.rolledNumber);
     const player = this.players.find(p => p.color === pawn.color);
 
-    // Calculate movement distance for scoring
-    let movementDistance = this.rolledNumber;
-    if (oldPosition === pawn.basePos) {
-        // Moving from base position, award points for the rolled number
-        movementDistance = this.rolledNumber;
-    }
+    // Only award points if pawn actually moves to a different position
+    if (oldPosition !== newPositionOfMovedPawn) {
+        this.changePositionOfPawn(pawn, newPositionOfMovedPawn);
 
-    this.changePositionOfPawn(pawn, newPositionOfMovedPawn);
+        // Award progress points - dice roll value points only when pawn moves
+        if (player) {
+            // Ensure we have a valid rolled number
+            const pointsToAward = this.rolledNumber || 1; // Fallback to 1 if no rolled number
+            player.addProgressScore(pointsToAward); // Award points equal to dice roll
 
-    // Award progress points
-    if (player) {
-        player.addProgressScore(movementDistance);
-
-        // Check if pawn reached home (final positions: red=73, blue=79, green=85, yellow=91)
-        const homePositions = { red: 73, blue: 79, green: 85, yellow: 91 };
-        if (newPositionOfMovedPawn === homePositions[pawn.color]) {
-            player.addHomeScore();
+            // Check if pawn reached home (final positions: red=73, blue=79, green=85, yellow=91)
+            const homePositions = { red: 73, blue: 79, green: 85, yellow: 91 };
+            if (newPositionOfMovedPawn === homePositions[pawn.color]) {
+                player.addHomeScore();
+            }
         }
-    }
 
-    this.beatPawns(newPositionOfMovedPawn, pawn.color);
+        this.beatPawns(newPositionOfMovedPawn, pawn.color);
+    }
+    // If pawn doesn't move (locked), no points are awarded
 };
 
 RoomSchema.methods.getPawnsThatCanMove = function () {

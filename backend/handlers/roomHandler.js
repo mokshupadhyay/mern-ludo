@@ -1,5 +1,11 @@
 const { getRooms, getRoom, updateRoom, createNewRoom } = require('../services/roomService');
-const { sendToOnePlayerRooms, sendToOnePlayerData, sendWinner } = require('../socket/emits');
+const {
+    sendToOnePlayerRooms,
+    sendToOnePlayerData,
+    sendWinner,
+    sendScoreUpdate,
+    sendLeaderboard,
+} = require('../socket/emits');
 
 module.exports = socket => {
     const req = socket.request;
@@ -14,6 +20,19 @@ module.exports = socket => {
         }
         sendToOnePlayerData(socket.id, room);
         if (room.winner) sendWinner(socket.id, room.winner);
+
+        // Send current scores and leaderboard to the player
+        if (room.started) {
+            const scores = room.players.map(player => ({
+                color: player.color,
+                name: player.name,
+                score: player.score || 0,
+                pawnsInHome: player.pawnsInHome || 0,
+                pawnsCaptured: player.pawnsCaptured || 0,
+            }));
+            sendScoreUpdate(socket.id, scores);
+            sendLeaderboard(socket.id, room.getLeaderboard());
+        }
     };
 
     const handleGetAllRooms = async () => {

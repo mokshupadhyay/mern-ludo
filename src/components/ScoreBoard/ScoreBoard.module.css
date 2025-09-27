@@ -1,0 +1,256 @@
+.scoreBoard {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background: rgba(30, 30, 47, 0.95);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    color: #fff;
+    width: 380px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    z-index: 1000;
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Custom Scrollbar */
+.scoreBoard::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scoreBoard::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.scoreBoard::-webkit-scrollbar-thumb {
+    background: rgba(255, 211, 105, 0.6);
+    border-radius: 3px;
+}
+
+.scoreBoard::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 211, 105, 0.8);
+}
+
+.title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 0.8rem;
+    color: #ffd369;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.scoresContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 0.8rem;
+}
+
+.playerCard {
+    background: rgba(42, 42, 61, 0.8);
+    border-radius: 10px;
+    padding: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.playerCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+}
+
+.playerHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+}
+
+.playerName {
+    font-size: 1rem;
+    color: #f1f1f1;
+}
+
+.playerDot {
+    font-size: 1.4rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.scoreSection {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.mainScore {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #ffd369;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.scoreDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    text-align: right;
+}
+
+.detail {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.3rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    backdrop-filter: blur(5px);
+}
+
+.detailLabel {
+    color: #b0b0b0;
+    font-weight: 500;
+}
+
+.detailValue {
+    color: #ffd369;
+    font-weight: 700;
+}
+
+.leaderboard {
+    margin-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 0.8rem;
+}
+
+.leaderboardTitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+    text-align: center;
+    color: #ffd369;
+}
+
+.leaderboardList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.leaderboardItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(45, 45, 64, 0.8);
+    padding: 0.5rem 0.7rem;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.leaderboardItem:hover {
+    background: #36364d;
+}
+
+.rank {
+    font-weight: bold;
+    color: #ffd369;
+}
+
+.leaderName {
+    flex-grow: 1;
+    text-align: center;
+    font-weight: 500;
+}
+
+.leaderScore {
+    font-weight: bold;
+}
+
+/* Mobile Responsive Design */
+@media (max-width: 768px) {
+    .scoreBoard {
+        position: relative;
+        top: auto;
+        left: auto;
+        margin: 1rem auto;
+        width: 90vw;
+        max-width: 350px;
+        padding: 1rem;
+        max-height: none;
+    }
+
+    .title {
+        font-size: 1.2rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .playerCard {
+        padding: 0.8rem;
+    }
+
+    .playerName {
+        font-size: 1rem;
+    }
+
+    .mainScore {
+        font-size: 1.6rem;
+    }
+
+    .scoreDetails {
+        font-size: 0.75rem;
+    }
+
+    .scoreSection {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.6rem;
+    }
+
+    .scoreDetails {
+        flex-direction: row;
+        gap: 0.6rem;
+        text-align: left;
+    }
+
+    .scoresContainer {
+        gap: 0.6rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .scoreBoard {
+        width: 95vw;
+        max-width: 300px;
+        padding: 0.8rem;
+    }
+
+    .title {
+        font-size: 1.1rem;
+    }
+
+    .playerCard {
+        padding: 0.7rem;
+    }
+
+    .mainScore {
+        font-size: 1.4rem;
+    }
+
+    .scoreDetails {
+        font-size: 0.7rem;
+    }
+}
